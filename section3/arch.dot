@@ -12,7 +12,10 @@ digraph g {
 
     scheduler -> apiserver
   }
- 
+  subgraph cluster_client {
+    label = "client"
+    kubectl
+  }
   apiserver -> worker_node_1_kubelet -> apiserver
   worker_node_1_kubeproxy -> apiserver
 
@@ -56,6 +59,6 @@ digraph g {
     n_kubelet -> worker_node_2_kubelet[constraint=false]
     n_kubelet -> worker_node_1_kubelet [constraint=false]
     n_kubelet -> kubelet[constraint=false]
-
   }
+  rankdir="LR"
 }
