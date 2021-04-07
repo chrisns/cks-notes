@@ -1,0 +1,61 @@
+digraph g {
+  subgraph cluster_master {
+    label = "master"
+    apiserver
+    etcd
+    kubelet
+    apiserver -> kubelet -> apiserver
+    
+    controllerManager -> apiserver
+
+    apiserver -> etcd
+
+    scheduler -> apiserver
+  }
+ 
+  apiserver -> worker_node_1_kubelet -> apiserver
+  worker_node_1_kubeproxy -> apiserver
+
+  apiserver -> worker_node_2_kubelet -> apiserver
+  worker_node_2_kubeproxy -> apiserver
+
+  subgraph cluster_workernode1 {
+		node [style=filled,color=white];
+    worker_node_1_kubelet[label = kubelet]
+    worker_node_1_kubeproxy[label = kubeproxy]
+		label = "worker node 1";
+	}
+  subgraph cluster_workernode2 {
+		node [style=filled,color=white];
+    worker_node_2_kubelet[label = kubelet]
+    worker_node_2_kubeproxy[label = kubeproxy]
+		label = "worker node 2";
+	}
+  kubectl -> apiserver
+
+  subgraph cluster_notes {
+    label = "notes"
+    node[shape=plaintext]
+    edge [ style=dashed, constraint=false]
+    n_etcd [label="independant CA stored in /etc/kubernetes/pki/etcd"]
+    n_etcd -> etcd
+    
+    n_overall [label="overall PKI in /etc/kubernetes/pki"]
+    n_apiserver [label="/etc/kubernetes/pki/apiserver.[crt/|key] server cert\n /etc/kubernetes/pki/apiserver-kubelet-client.[crt|key] client cert used for talking to kubelets\n /etc/kubernetes/pki/apiserver-etcd-client.[crt|key] used for talking to etcd"]
+    n_apiserver -> apiserver
+    n_admin [label="/etc/kubernetes/admin.conf contains client keypair to talk to api-server and the overal pki public cert"]
+    n_admin -> kubectl  
+
+    n_controllerManager [label="/etc/kubernetes/controller-manager.conf contains client keypair to talk to api-server and the overall pki public cert"]
+    n_controllerManager -> controllerManager
+
+    n_scheduler [label="/etc/kubernetes/scheduler.conf contains client keypair to talk to api-server and the overall pki public cert"]
+    n_scheduler -> scheduler 
+
+    n_kubelet [label="/etc/kubernetes/kubelet.conf contains the overall pki public cert, and links to the location of the private+public keypair used for talking to the api server, stored /var/lib/kubelet/pki/kubelet-client-current.pem"]
+    n_kubelet -> worker_node_2_kubelet[constraint=false]
+    n_kubelet -> worker_node_1_kubelet [constraint=false]
+    n_kubelet -> kubelet[constraint=false]
+
+  }
+}
