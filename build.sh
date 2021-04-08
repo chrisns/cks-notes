@@ -29,3 +29,5 @@ TOKEN=$(gcloud compute ssh cks-master --command="sudo kubeadm token create --pri
 echo $TOKEN | gcloud compute ssh cks-worker -- sudo bash
 
 gcloud compute ssh cks-master --command="sudo kubectl get nodes"
+
+gcloud compute ssh cks-master --zone=europe-west2-c --command="wget https://github.com/ahmetb/kubectx/releases/download/v0.9.3/kubens; chmod +x kubens; sudo mv kubens /usr/local/bin"
