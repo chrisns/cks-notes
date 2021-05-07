@@ -1,7 +1,6 @@
 name: "Security Scanning"
 on:
   push:
-  pull_request:
 jobs:
   CodeQL:
     name: CodeQL
@@ -13,9 +12,13 @@ jobs:
         fetch-depth: 2
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v1
+      continue-on-error: true
+      id: initcodeql
     - name: Autobuild
+      if: steps.initcodeql.outcome == 'success'
       uses: github/codeql-action/autobuild@v1
     - name: Perform CodeQL Analysis
+      if: steps.initcodeql.outcome == 'success'
       uses: github/codeql-action/analyze@v1
 
   ShiftLeft:
